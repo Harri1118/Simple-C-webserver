@@ -25,16 +25,18 @@ void *userHandler(void *arg){
     // Process data
     // Example: Check if path exists
     char* notFound = "404 Not found.";
-    //char *path = getPath(buffer);
+    char *path = getPath(buffer);
     if (!pathExists(buffer)) {
         send(cliSocket, notFound, strlen(notFound), 0);
     } else {
         //printf("IS THIS WORKING HELLOOOOO\n");
-        char *path = getPath(buffer);
-        char *RESPONSE = response(path);
+     //   char *path = getPath(buffer);
+        //char *RESPONSE = response(path);
         //free(path);
-        //char *RESPONSE = "test";
-        send(cliSocket, RESPONSE, strlen(RESPONSE), 0);
+        char* RESPONSE = response(path);
+        printf("%s",RESPONSE);
+	free(path);
+	send(cliSocket, RESPONSE, strlen(RESPONSE), 0);
         free(RESPONSE);
     }
     //free(path);
