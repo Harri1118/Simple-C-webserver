@@ -17,7 +17,6 @@ i++;
 }
 Path[n] = '\0';
 char *fin = strdup(Path);
-//printf("getPath worked.\n");
 return fin;
 }
 
@@ -27,7 +26,6 @@ return fin;
 bool pathExists(char input[500]){
 	char *path = getPath(input);
 	bool exists;
-	printf("%s\n",path);
 	if (access(path, F_OK) != -1)
 		exists = true;
 	else
