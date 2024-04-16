@@ -4,44 +4,31 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <sys/stat.h>
+
 // Response opens the path, retrieves the size of the filepath, and forms a response using
-// sprintf. It then returns a string for main to utilize as a response.
-char *response2(char *PATH) {
-    FILE *file = fopen(PATH, "rb");
-    fseek(file, 0, SEEK_END);
-    long size = ftell(file);
-    fseek(file, 0, SEEK_SET);
-    char *begin = malloc(200);
-    if (begin == NULL) {
-        fprintf(stderr, "Memory allocation failed.\n");
-        exit(EXIT_FAILURE);
-    }
-    sprintf(begin, "HTTP/1.1 200 OK\r\n\r\nContent-Length:%ld\r\n\r\n", size);
-    char *buffer = malloc(strlen(begin) + size + 1);
-    strcpy(buffer, begin);
-    fread(buffer + strlen(begin), 1, size, file);
-    buffer[strlen(begin) + size] = '\0';
-    fclose(file);
-    free(begin);
-    printf("%s\n",buffer);
-    return buffer;
-}
-
-char *response(char *PATH) {
-    int file = open(PATH, O_RDONLY);
-    off_t size = lseek(file, 0, SEEK_END);
-    lseek(file, 0, SEEK_SET);
-    char *begin = malloc(200);
-    sprintf(begin, "HTTP/1.1 200 OK\r\n\r\nContent-Length:%ld\r\n\r\n", size);
-    char *buffer = malloc(strlen(begin) + size + 1);
-    strcpy(buffer, begin);
-    ssize_t bytes_read = read(file, buffer + strlen(begin), size);
-    buffer[strlen(begin) + size] = '\0';
+// sprintf (to set up the 200 response and to display the content length). Aftet this, it
+// then mallocs the sprintf product and a buffer is also malloced of the file contents.
+// A third varaible is malloced, equal to the sum of the two sizes of the other strings.
+// It then copies the 200 OK string and concatenates the next string. It then frees
+// the two strings used for the final product and fin is returned.
+char* response(char *input) {
+    struct stat fileStatStruct;
+    stat(input, &fileStatStruct);
+    off_t fileSize = fileStatStruct.st_size;
+    int file = open(input, O_RDONLY);
+    char* begin = malloc(200);
+    sprintf(begin, "HTTP/1.1 200 OK\r\n\r\nContent-Length:%ld\r\n\r\n", fileSize);
+    int beginSize = strlen(begin);
+    char* buffer = malloc(500);
+    ssize_t bytesRead = read(file, buffer, 500);
+    buffer[bytesRead] = '\0';
     close(file);
+    int size = beginSize + 500;
+    char *fin = malloc(size);
+    strcpy(fin,begin);
+    strcat(fin, buffer); 
     free(begin);
-    printf("%s\n",buffer);
-    return buffer;
+    free(buffer);
+    return fin;
 }
-
-
-
